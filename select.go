@@ -43,6 +43,7 @@ func (j JoinType) IsLateral() bool {
 // SelectStmt represents a SELECT statement
 type SelectStmt struct {
 	Table           string
+	TableIndirect   *IndirectValue
 	LimitTo         int64
 	OffsetFrom      int64
 	OffsetRows      int64
@@ -203,6 +204,12 @@ func (stmt *SelectStmt) Distinct(cols ...string) *SelectStmt {
 // From sets the table to select from
 func (stmt *SelectStmt) From(table string) *SelectStmt {
 	stmt.Table = table
+	return stmt
+}
+
+// FromIndirect sets the table to select from
+func (stmt *SelectStmt) FromIndirect(table *IndirectValue) *SelectStmt {
+	stmt.TableIndirect = table
 	return stmt
 }
 
@@ -414,6 +421,11 @@ func (stmt *SelectStmt) ToSQL(rebind bool) (asSQL string, bindings []interface{}
 
 	if len(stmt.Table) > 0 {
 		clauses = append(clauses, fmt.Sprintf("FROM %s", stmt.Table))
+	} else {
+		if stmt.TableIndirect != nil {
+			clauses = append(clauses, fmt.Sprintf("FROM %s", stmt.TableIndirect.Reference))
+			bindings = append(bindings, stmt.TableIndirect.Bindings...)
+		}
 	}
 
 	for _, join := range stmt.Joins {
