@@ -184,8 +184,8 @@ func (tx *Tx) Select(cols ...string) *SelectStmt {
 	}
 }
 
-// InDirectColumns adds sqlz.IndirectValue columns to the statement.
-// This can be useful when using database function inside the select statement
+// InDirectColumns adds IndirectValue columns to the statement. This can be
+// be useful when using database functions for columns.
 func (stmt *SelectStmt) InDirectColumns(cols ...IndirectValue) *SelectStmt {
 	stmt.IndirectColumns = append([]IndirectValue{}, cols...)
 	return stmt
